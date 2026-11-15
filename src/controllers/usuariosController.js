@@ -8,7 +8,27 @@ function obtenerUsuario(req, res) {
     return res.status(400).json({ error: "El id debe ser numérico" });
   }
 
-  res.json(usuariosService.obtenerUsuarioPorId(id));
+  const usuario = usuariosService.obtenerUsuarioPorId(id);
+  if (!usuario) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+  res.json(usuario);
+}
+
+function crearUsuario(req, res) {
+  const errorValidacion = usuariosService.validarDatosUsuario(req.body);
+  if (errorValidacion) {
+    return res.status(400).json({ error: errorValidacion });
+  }
+
+  try {
+    const usuario = usuariosService.crearUsuario(req.body);
+    log(`Usuario ${usuario.id} creado`);
+    res.status(201).json(usuario);
+  } catch (err) {
+    log(`Error al crear usuario: ${err.message}`);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 }
 
 function actualizarUsuario(req, res) {
@@ -56,4 +76,9 @@ function eliminarUsuario(req, res) {
   }
 }
 
-module.exports = { obtenerUsuario, actualizarUsuario, eliminarUsuario };
+module.exports = {
+  obtenerUsuario,
+  crearUsuario,
+  actualizarUsuario,
+  eliminarUsuario,
+};
