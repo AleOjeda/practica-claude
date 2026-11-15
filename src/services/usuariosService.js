@@ -10,17 +10,21 @@ function esIdValido(id) {
   return new RegExp(`^\\d{1,${MAX_DIGITOS_ID}}$`).test(id);
 }
 
-function validarDatosUsuario(datos) {
-  if (!datos || typeof datos !== "object" || Array.isArray(datos)) {
-    return "El cuerpo debe ser un objeto JSON";
-  }
-  const { nombre, email } = datos;
+function esObjetoPlano(datos) {
+  return Boolean(datos) && typeof datos === "object" && !Array.isArray(datos);
+}
+
+function validarNombre(nombre) {
   if (typeof nombre !== "string" || nombre.trim() === "") {
     return "El nombre es obligatorio";
   }
   if (nombre.trim().length > MAX_NOMBRE) {
     return `El nombre no puede superar ${MAX_NOMBRE} caracteres`;
   }
+  return null;
+}
+
+function validarEmail(email) {
   if (typeof email !== "string") {
     return "El email no es válido";
   }
@@ -30,6 +34,33 @@ function validarDatosUsuario(datos) {
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpio)
   ) {
     return "El email no es válido";
+  }
+  return null;
+}
+
+function validarDatosUsuario(datos) {
+  if (!esObjetoPlano(datos)) {
+    return "El cuerpo debe ser un objeto JSON";
+  }
+  return validarNombre(datos.nombre) || validarEmail(datos.email);
+}
+
+// Para PATCH: al menos un campo; solo se validan los que vienen.
+function validarDatosParciales(datos) {
+  if (!esObjetoPlano(datos)) {
+    return "El cuerpo debe ser un objeto JSON";
+  }
+  const { nombre, email } = datos;
+  if (nombre === undefined && email === undefined) {
+    return "Debe enviar nombre y/o email";
+  }
+  if (nombre !== undefined) {
+    const error = validarNombre(nombre);
+    if (error) return error;
+  }
+  if (email !== undefined) {
+    const error = validarEmail(email);
+    if (error) return error;
   }
   return null;
 }
@@ -44,6 +75,10 @@ function normalizarDatos({ nombre, email }) {
 
 function existeUsuario(id) {
   return usuarios.has(Number(id));
+}
+
+function listarUsuarios() {
+  return Array.from(usuarios.values(), (u) => ({ ...u }));
 }
 
 function obtenerUsuarioPorId(id) {
@@ -65,6 +100,22 @@ function actualizarUsuario(id, datos) {
   return usuario;
 }
 
+function actualizarParcialUsuario(id, datos) {
+  const actual = obtenerUsuarioPorId(id);
+  if (!actual) {
+    return null;
+  }
+  const usuario = { ...actual };
+  if (datos.nombre !== undefined) {
+    usuario.nombre = datos.nombre.trim();
+  }
+  if (datos.email !== undefined) {
+    usuario.email = normalizarEmail(datos.email);
+  }
+  usuarios.set(usuario.id, usuario);
+  return usuario;
+}
+
 function eliminarUsuario(id) {
   return usuarios.delete(Number(id));
 }
@@ -72,9 +123,12 @@ function eliminarUsuario(id) {
 module.exports = {
   esIdValido,
   validarDatosUsuario,
+  validarDatosParciales,
   existeUsuario,
+  listarUsuarios,
   obtenerUsuarioPorId,
   crearUsuario,
   actualizarUsuario,
+  actualizarParcialUsuario,
   eliminarUsuario,
 };

@@ -1,8 +1,8 @@
 - generic [ref=e1]:
-  - heading "Crear usuario" [level=1] [ref=e2]
-  - generic [ref=e3]:
-    - generic [ref=e4]: Nombre
-    - textbox "Nombre" [ref=e5]: Ana
-    - generic [ref=e6]: Email
-    - textbox "Email" [active] [ref=e7]
-    - button "Enviar" [ref=e8]
+    - heading "Crear usuario" [level=1] [ref=e2]
+    - generic [ref=e3]:
+        - generic [ref=e4]: Nombre
+        - textbox "Nombre" [ref=e5]: Ana
+        - generic [ref=e6]: Email
+        - textbox "Email" [active] [ref=e7]
+        - button "Enviar" [ref=e8]

@@ -16,3 +16,12 @@
 ## No hacer
 
 - No instalar librerías nuevas sin avisarme
+
+## Front (carpeta web/)
+
+- React + TypeScript con Vite. Iniciar: `cd web && npm run dev` (puerto 5173)
+- Tests: `cd web && npm test` (Vitest + React Testing Library)
+- Componentes funcionales con hooks; sin `any`
+- Llamadas a la API solo desde `web/src/api/`, nunca `fetch` dentro de componentes
+- Cada componente tiene estados de carga y de error visibles
+- Estilos con CSS Modules

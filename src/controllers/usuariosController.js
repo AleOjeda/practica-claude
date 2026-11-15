@@ -1,6 +1,15 @@
 const usuariosService = require("../services/usuariosService");
 const { log } = require("../logger");
 
+function listarUsuarios(req, res) {
+  try {
+    res.json(usuariosService.listarUsuarios());
+  } catch (err) {
+    log(`Error al listar usuarios: ${err.message}`);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+}
+
 function obtenerUsuario(req, res) {
   const { id } = req.params;
 
@@ -56,6 +65,31 @@ function actualizarUsuario(req, res) {
   }
 }
 
+function actualizarParcialUsuario(req, res) {
+  const { id } = req.params;
+
+  if (!usuariosService.esIdValido(id)) {
+    return res.status(400).json({ error: "El id debe ser numérico" });
+  }
+
+  const errorValidacion = usuariosService.validarDatosParciales(req.body);
+  if (errorValidacion) {
+    return res.status(400).json({ error: errorValidacion });
+  }
+
+  try {
+    const usuario = usuariosService.actualizarParcialUsuario(id, req.body);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    log(`Usuario ${id} actualizado parcialmente`);
+    res.json(usuario);
+  } catch (err) {
+    log(`Error al actualizar parcialmente usuario ${id}: ${err.message}`);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+}
+
 function eliminarUsuario(req, res) {
   const { id } = req.params;
 
@@ -77,8 +111,10 @@ function eliminarUsuario(req, res) {
 }
 
 module.exports = {
+  listarUsuarios,
   obtenerUsuario,
   crearUsuario,
   actualizarUsuario,
+  actualizarParcialUsuario,
   eliminarUsuario,
 };
