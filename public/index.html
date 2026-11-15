@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crear usuario</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 420px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+      }
+      #resultado {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f4f4f4;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      #resultado.error {
+        background: #fde8e8;
+        color: #9b1c1c;
+      }
+      #resultado:empty {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Crear usuario</h1>
+
+    <form id="formulario">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" name="nombre" type="text" required maxlength="100" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required maxlength="254" />
+
+      <button type="submit">Enviar</button>
+    </form>
+
+    <pre id="resultado" aria-live="polite"></pre>
+
+    <script>
+      const formulario = document.getElementById("formulario");
+      const resultado = document.getElementById("resultado");
+      const boton = formulario.querySelector("button");
+
+      formulario.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        boton.disabled = true;
+        resultado.className = "";
+        resultado.textContent = "Enviando...";
+
+        const datos = {
+          nombre: formulario.nombre.value,
+          email: formulario.email.value,
+        };
+
+        try {
+          const res = await fetch("/usuarios", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos),
+          });
+          const cuerpo = await res.json().catch(() => null);
+
+          if (!res.ok) {
+            resultado.className = "error";
+            resultado.textContent = `Error ${res.status}: ${cuerpo?.error ?? "respuesta inesperada"}`;
+            return;
+          }
+
+          resultado.textContent = `Usuario creado (${res.status}):\n${JSON.stringify(cuerpo, null, 2)}`;
+          formulario.reset();
+        } catch (err) {
+          resultado.className = "error";
+          resultado.textContent = "No se pudo conectar con el servidor";
+        } finally {
+          boton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

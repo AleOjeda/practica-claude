@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const usuariosRoutes = require("./routes/usuarios");
 const { log } = require("./logger");
@@ -5,6 +6,9 @@ const { log } = require("./logger");
 const app = express();
 
 app.use(express.json());
+
+// Página HTML con el formulario de alta de usuarios (public/index.html en /)
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/salud", (req, res) => {
   res.json({ ok: true });
